@@ -5,13 +5,12 @@ var url = 'http://localhost:3000/'
 
 angular.module('MagicRealm')
   .service('Player',[ '$resource', function($resource){
-    var res = $resource(url+'players/:id/:action', {id: '@id'}, {
-      show:  {method:'GET', isArray:false, params:{id: '@id'}},
-      update: { method:'PUT'},
-      move_clearing: {method: 'PUT', params:{id: '@id', action: 'move_clearing'}}
+    return $resource (url+'players/:id/:action',null, {
+      create: { method: 'POST' },
+      show:   { method:'GET', isArray:false, params:{id: '@id'} },
+      update: { method:'PUT' },
+      move_clearing: { method: 'PUT', params:{id: '@id', action: 'move_clearing'} }
     });
-    window.res_player = res
-    return res;
 }]);
 
 //http://localhost:3000/players/1/move_clearing

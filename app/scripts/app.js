@@ -35,7 +35,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
       controller: 'SetupCtrl'
     })
     .state('game', {
-      url: '/game',
+      url: '/game/:id',
       templateUrl: viewsPath+'game.html',
       controller: 'GameCtrl'
     });
