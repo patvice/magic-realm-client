@@ -1,17 +1,19 @@
-<div class="jumbotron">
-  <h1 class="m20">Start The Game</h1>
-  <button class="btn btn-success btn-lg" ui-sref="game">Start New Game</button>
-</div>
+<div class="container">
+  <div class="jumbotron">
+    <h1 class="m20">Start The Game</h1>
+    <button class="btn btn-success btn-lg" ui-sref="game">Start New Game</button>
+  </div>
 
-<div class="col-md-12 m20">
-  <h2 class="m20">Available games to join:</h1>
-  <label for=""><strong>Search for a friend:</strong></label>
-  <input placeholder="Name" ng-model="search" type="text">
-</div>
+  <div class="col-md-12 m20">
+    <h2 class="m20">Available games to join:</h1>
+    <label for=""><strong>Search for a friend:</strong></label>
+    <input placeholder="Name" ng-model="search" type="text">
+  </div>
 
-<div class="col-md-4" ng-repeat="game in games | filter:search">
-  <h2>Game {{game.id}}</h2>
-  <button class="btn btn-success" ui-sref="setup({id: {{game.id}}})">Join Game</button>
-  <h4>Players:</h4>
-  <p ng-repeat="player in game.players">{{player.first_name+" "+player.last_name}}</p>
-</div>
+  <div class="col-md-4" ng-repeat="game in games | filter:search">
+    <h2>Game {{game.id}}</h2>
+    <button class="btn btn-success" ui-sref="setup({id: {{game.id}}})">Join Game</button>
+    <h4>Players:</h4>
+    <p ng-repeat="player in game.players">{{player.first_name+" "+player.last_name}}</p>
+  </div>
+<div>
