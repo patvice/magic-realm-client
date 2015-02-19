@@ -29,8 +29,13 @@ app.config(function($stateProvider, $urlRouterProvider) {
       templateUrl: viewsPath+'main.html',
       controller: 'MainCtrl'
     })
+    .state('setup', {
+      url: '/setup/:id',
+      templateUrl: viewsPath+'setup.html',
+      controller: 'SetupCtrl'
+    })
     .state('game', {
-      url: '/game',
+      url: '/game/:id',
       templateUrl: viewsPath+'game.html',
       controller: 'GameCtrl'
     });
@@ -39,5 +44,11 @@ app.config(function($stateProvider, $urlRouterProvider) {
   $state.go('main');
   $rootScope.$state = $state;
 });
+
+app.config(['$httpProvider', function($httpProvider) {
+        $httpProvider.defaults.useXDomain = true;
+        delete $httpProvider.defaults.headers.common['X-Requested-With'];
+    }
+]);
 
 

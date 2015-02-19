@@ -1,4 +1,19 @@
-
-<script>
-</script>
-<json-formatter json="game" open="1"></json-formatter>
+<div class="col-md-5 pull-left">
+  <div class="row m20">
+    <h2>Bird Song!</h2>
+    <h4>Available Actions</h4>
+    <div class="btn-group" role="group" aria-label="actions">
+      <button ng-click="move_action()" class="btn btn-default">Move</button>
+      <button class="btn btn-default">Hide</button>
+      <button class="btn btn-default">Rest</button>
+      <button class="btn btn-default">Search</button>
+    </div>
+  </div>
+  <div class="row m20">
+    <h2>Actions Planed</h2>
+  </div>
+  <br>
+  <div class="row m20">
+    <json-formatter json="player_info" open="1"></json-formatter>
+  </div>
+</div>

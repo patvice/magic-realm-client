@@ -1,0 +1,74 @@
+<div class="container">
+  <div ng-if="lessThenFive" class="alert alert-danger" role="alert">
+    OOOhhh No! You need to <strong>Allocate</strong> at least five Victory Points
+    <span class="glyphicon glyphicon-remove pull-right" aria-hidden="true" ng-click="closeFive()"></span>
+  </div>
+
+  <div ng-hide="showForm">
+    <div clas="row" style="margin:30px" >
+      <h1>Step 1:</h1>
+      <h2 style="display:inline">Select a Class:</h1>
+      <button class="btn btn-success btn-lg" align="center" ng-click="selectChamp(champ_info[id])">
+        Select {{champ_info[id].name}}
+      </button>
+      <button ng-click="prev()" class="btn btn-danger btn-lg" align="center">
+        Prev
+      </button>
+      <button ng-click="next()" class="btn btn-danger btn-lg" align="center">
+        Next
+      </button>
+    </div>
+
+    <img align="center" src="{{champ_info[id].url}}" alt="{{champ_info[id].name}}">
+  </div>
+
+  <div ng-show="showForm">
+    <h2>Allocate Victory Points</h2>
+    <div class="mb30 row input class="form-control"-group">
+      <div class="col-md-3">
+        <label for="">Greater Treasures</label>
+        <input class="form-control" ng-model="great_treasures_vps" type="text">
+      </div>
+      <div class="col-md-2">
+        <label for="">Usable Spells</label>
+        <input class="form-control" ng-model="usable_spells_vps" type="text">
+      </div>
+      <div class="col-md-2">
+        <label for="">Fame</label>
+        <input class="form-control" ng-model="fame_vps" type="text">
+      </div>
+      <div class="col-md-2">
+        <label for="">Notoriety</label>
+        <input class="form-control" ng-model="notoriety_vps" type="text">
+      </div>
+      <div class="col-md-2">
+        <label for="">Gold</label>
+        <input class="form-control" ng-model="gold_vps" type="text">
+      </div>
+    </div>
+
+    <div class="row mb30">
+      <div class="col-md-4">
+        <label for="">First Name</label>
+        <input class="form-control" ng-model="firstName" type="text" placeholder="first">
+      </div>
+      <div class="col-md-4">
+        <label for="">Last Name</label>
+        <input class="form-control" ng-model="lastName" type="text" placeholder="last">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <h4>
+          Selected Class: <strong>{{selected_champ_name}}</strong>
+        </h4>
+        <button class="btn btn-danger btn-sm">Change Class</button>
+      </div>
+      <div class="col-md-6">
+        <h4>All Done?</h4>
+        <button class="btn btn-success btn-sm" ng-click="submit()">Vote to Start!</button>
+      </div>
+    </div>
+  </div>
+</div>

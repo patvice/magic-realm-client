@@ -5,9 +5,9 @@ var url = 'http://127.0.0.1:3000/'
 
 angular.module('MagicRealm')
   .service('Game',[ '$resource', function($resource){
-    return $resource(url+'game.json', {}, {
+    return $resource(url+'games', {}, {
       index: {method:'GET', isArray:true},
-      show:  {method:'GET', isArray:false}
+      create: {method: 'POST'}
     });
 }]);
 

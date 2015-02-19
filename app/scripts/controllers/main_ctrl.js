@@ -8,5 +8,10 @@
  * Controller of the comp3004App
  */
 angular.module('MagicRealm')
-  .controller('MainCtrl', function ($scope) {
-  });
+.controller('MainCtrl',['$scope', 'Game', function ($scope, Game) {
+  $scope.games = []
+
+  Game.index( function(games){
+    $scope.games = games
+  })
+}]);

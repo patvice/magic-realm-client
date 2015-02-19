@@ -4,6 +4,17 @@ body {
   padding-bottom: 20px;
 }
 
+.m20 {
+  margin: 20px;
+}
+
+.mb20 {
+  margin-bottom: 20px;
+}
+.mb30 {
+  margin-bottom: 30px;
+}
+
 .sjs {
     background:#f1f4fe;
     border:1px #333 solid;
