@@ -11,7 +11,7 @@ var url = 'http://localhost:3000/'
 // var url = #actually_url
 
 angular.module('MagicRealm')
-  .controller('GameCtrl',['$scope','$window','$stateParams','Player', function ($scope, $window, $stateParams, Player) {
+  .controller('GameCtrl',['$scope','$window','$stateParams','ActionQueue','Player', function ($scope, $window, $stateParams, ActionQueue, Player) {
     var sjs = $window.sjs
     var game_height = 705;
     var game_width = 725;
@@ -30,6 +30,7 @@ angular.module('MagicRealm')
     var objects = scene.Layer('objects', {userCanvas:true})
 
     $scope.spriteObjects = {};
+    $scope.spriteObjects.start_clearings = [];
     $scope.action = '';
 
     $scope.load_player = function() {
@@ -39,21 +40,20 @@ angular.module('MagicRealm')
         $scope.set_other_players(player_info)
       });
     };
-
     // Player
     $scope.set_player = function(player_info){
       $scope.spriteObjects.player = objects.Sprite('images/charater_icons/chr_'+player_info.character_class.name+'.jpg')
-      $scope.move_player(player_info)
+      var player_clearing = player_info.clearing;
+
+      $scope.spriteObjects.player.position(player_clearing.x, player_clearing.y);
     };
     $scope.move_player = function(player_info){
-      var player_clearing = player_info.clearing;
-      $scope.spriteObjects.player.position(0,0)
+      var player_clearing = $scope.action_queues[$scope.action_queues.length-1].clearing;
       $scope.spriteObjects.player.position(player_clearing.x, player_clearing.y);
     };
     $scope.set_other_players = function (player_info) {
       $scope.spriteObjects.other_players = [];
       player_info.game.players.forEach(function (player){
-        console.log(player.id, $stateParams.id);
         if(player.id !== parseInt($stateParams.id)){
           var p = objects.Sprite('images/charater_icons/chr_'+player.character_class.name+'.jpg')
           p.position(player.clearing.x, player.clearing.y)
@@ -67,9 +67,12 @@ angular.module('MagicRealm')
       });
       $scope.spriteObjects.other_players = [];
     };
+
     // Clearing
     $scope.set_circles = function(player_info){
-      var clearingJson = player_info.clearing.traversable_clearings
+      var action_queues = player_info.action_queues
+      var clearingJson = action_queues[action_queues.length-1].clearing.traversable_clearings
+      $scope.traversable_clearings = clearingJson
 
       $scope.spriteObjects.circles = [];
       for (var i = 0; i < clearingJson.length; i++) {
@@ -80,6 +83,13 @@ angular.module('MagicRealm')
         $scope.spriteObjects.circles.push(circle)
       }
     };
+    $scope.set_blue_circle = function(){
+      var sc = objects.Sprite('images/circle_start.gif')
+      var player = $scope.spriteObjects.player
+
+      sc.position(player.x, player.y);
+      $scope.spriteObjects.start_clearings.push(sc);
+    };
     $scope.remove_circles = function (){
       for (var i = 0; i < $scope.spriteObjects.circles.length; i++) {
         $scope.spriteObjects.circles[i].remove();
@@ -87,25 +97,81 @@ angular.module('MagicRealm')
       $scope.spriteObjects.circles = [];
     };
 
-    // Moving Clearing / Post Players
-    $scope.move_clearing = function(p_id, c_id){
-      $scope.ticker.pause();
+    $scope.create_action = function(p_id, c_id){
       var params = {
-        id: p_id,
-        clearing_id: c_id
+        player_id: p_id,
+        clearing_id: c_id,
+        action_name: $scope.action
       }
-      Player.move_clearing(params, function(player_info){
-        $scope.remove_circles()
-        $scope.move_player(player_info)
+      ActionQueue.create(params, function(player_info){
+        if($scope.action !== 'move'){
+          $scope.action_queues = player_info.action_queues;
+          $scope.action = '';
+        }else{
+          $scope.set_circles(player_info);
+        }
+        $scope.player_info = player_info;
         $scope.ticker.resume();
-        $scope.player_info = player_info
+      });
+    };
+    // Moving Clearing / Post Players
+    $scope.update_action = function(p_id, c_id){
+      var action_queues = $scope.player_info.action_queues
+      var params = {
+        id: action_queues[action_queues.length-1].id,
+        player_id: p_id,
+        clearing_id: c_id,
+        action_name: $scope.action
+      }
+      ActionQueue.update(params, function(player_info){
+        $scope.action = '';
+        $scope.remove_circles();
+        $scope.set_blue_circle()
+        $scope.action_queues = player_info.action_queues;
+        $scope.player_info = player_info;
+        $scope.move_player();
+        $scope.ticker.resume();
       });
     };
 
+    $scope.delete_action = function(){
+      var params = {id: $scope.player_info.id};
+      Player.destroy_last_action(params, function(player_info){
+        if($scope.action_queues[$scope.action_queues.length-1].action_name === 'move'){
+          var circle = $scope.spriteObjects.start_clearings.pop();
+          $scope.spriteObjects.player.position(circle.x, circle.y)
+          circle.remove();
+        }
+        $scope.action_queues = player_info.action_queues;
+        $scope.player_info = player_info;
+      });
+    };
+
+    $scope.create_call = function(){
+      if ($scope.player_info.action_queues.length === 0){
+        $scope.create_action($scope.player_info.id, $scope.player_info.clearing.id)
+      }else{
+        var action_queue = $scope.player_info.action_queues[$scope.player_info.action_queues.length-1]
+        $scope.create_action($scope.player_info.id, action_queue.clearing.id)
+      }
+    };
     // Click functions
     $scope.move_action = function(){
+      $scope.ticker.pause();
       $scope.action = 'move';
-      $scope.set_circles($scope.player_info)
+      $scope.create_call();
+    };
+    $scope.hide_action = function(){
+      $scope.action = 'hide';
+      $scope.create_call();
+    };
+    $scope.rest_action = function(){
+      $scope.action = 'rest';
+      $scope.create_call();
+    };
+    $scope.search_action = function(){
+      $scope.action = 'search';
+      $scope.create_call();
     };
 
     var paint = function() {
@@ -121,7 +187,7 @@ angular.module('MagicRealm')
         }
       });
       if(input.mouse.click && $scope.action == 'move') {
-        var clearingJson = $scope.player_info.clearing.traversable_clearings
+        var clearingJson = $scope.traversable_clearings
 
         for (var i = 0; i < clearingJson.length; i++) {
           var c = clearingJson[i].clearing
@@ -129,7 +195,8 @@ angular.module('MagicRealm')
           var within_y = (c.y+20) > mouse.click.y && mouse.click.y > (c.y-20)
 
           if( within_x && within_y){
-            $scope.move_clearing($scope.player_info.id, c.id)
+            $scope.update_action($scope.player_info.id, c.id)
+            $scope.ticker.pause();
             return;
           }
         }

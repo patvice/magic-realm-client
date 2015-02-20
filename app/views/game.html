@@ -3,14 +3,24 @@
     <h2>Bird Song!</h2>
     <h4>Available Actions</h4>
     <div class="btn-group" role="group" aria-label="actions">
-      <button ng-click="move_action()" class="btn btn-default">Move</button>
-      <button class="btn btn-default">Hide</button>
-      <button class="btn btn-default">Rest</button>
-      <button class="btn btn-default">Search</button>
+      <button ng-disabled="action !== 'move' && action !== ''" ng-click="move_action()" class="btn btn-default">Move</button>
+      <button ng-disabled="action !== 'hide' && action !== ''" ng-click="hide_action()" class="btn btn-default">Hide</button>
+      <button ng-disabled="action !== 'rest' && action !== ''" ng-click="rest_action()" class="btn btn-default">Rest</button>
+      <button ng-disabled="action !== 'search' && action !== ''" ng-click="search_action()" class="btn btn-default">Search</button>
+    </div>
+    <div class="mt10">
+      <button ng-click="delete_action()" class="btn btn-danger btn-large">Delete</button>
     </div>
   </div>
   <div class="row m20">
     <h2>Actions Planed</h2>
+    <div ng-repeat="action in action_queues" >
+      <p>
+        {{$index + 1}} {{action.action_name}},
+        <span>Cleaing: {{action.clearing_id}}</span>
+        <span ng-if="action == 'move'"></span>
+      </p>
+    </div>
   </div>
   <br>
   <div class="row m20">
