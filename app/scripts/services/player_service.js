@@ -10,7 +10,8 @@ angular.module('MagicRealm')
       show:   { method:'GET', isArray:false, params:{id: '@id'} },
       update: { method:'PUT' },
       move_clearing: { method: 'PUT', params:{id: '@id', action: 'move_clearing'} },
-      destroy_last_action: {method: 'PUT', params:{id: '@id', action:'destroy_last_action'}}
+      destroy_last_action: {method: 'PUT', params:{id: '@id', action:'destroy_last_action'}},
+      submit_actions: {method: 'PUT', params:{id: '@id', action: 'submit_actions'}}
     });
 }]);
 

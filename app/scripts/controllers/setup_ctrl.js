@@ -94,7 +94,7 @@ angular.module('MagicRealm')
         console.log("CREATED")
         console.log(player);
         var toParams = {id: player.id}
-        $state.go('game', toParams)
+        $state.go('song_bird', toParams)
       });
     }
 
