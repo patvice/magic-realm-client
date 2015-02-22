@@ -11,7 +11,7 @@ var url = 'http://localhost:3000/'
 // var url = #actually_url
 
 angular.module('MagicRealm')
-  .controller('GameCtrl',['$scope','$window','$stateParams','ActionQueue','Player', function ($scope, $window, $stateParams, ActionQueue, Player) {
+  .controller('SongBirdCtrl',['$scope','$window','$stateParams','ActionQueue','Player', function ($scope, $window, $stateParams, ActionQueue, Player) {
     var sjs = $window.sjs
     var game_height = 705;
     var game_width = 725;
@@ -33,9 +33,15 @@ angular.module('MagicRealm')
     $scope.spriteObjects.start_clearings = [];
     $scope.action = '';
 
+    $scope.move_b = false;
+    $scope.hide_b = false;
+    $scope.rest_b = false;
+    $scope.search_b = false;
+
     $scope.load_player = function() {
       Player.show({id: $stateParams.id}, function(player_info){
         $scope.player_info = player_info
+        $scope.action_queues = player_info.action_queues
         $scope.set_player(player_info)
         $scope.set_other_players(player_info)
       });
@@ -71,14 +77,13 @@ angular.module('MagicRealm')
     // Clearing
     $scope.set_circles = function(player_info){
       var action_queues = player_info.action_queues
-      var clearingJson = action_queues[action_queues.length-1].clearing.traversable_clearings
-      $scope.traversable_clearings = clearingJson
+      var clearingJson = action_queues[action_queues.length-1].clearings
+      $scope.target_clearings = clearingJson
 
       $scope.spriteObjects.circles = [];
       for (var i = 0; i < clearingJson.length; i++) {
         var circle = clearing.Sprite('images/circle.gif');
-        var c = clearingJson[i].clearing
-
+        var c = clearingJson[i]
         circle.position(c.x, c.y);
         $scope.spriteObjects.circles.push(circle)
       }
@@ -103,14 +108,28 @@ angular.module('MagicRealm')
         clearing_id: c_id,
         action_name: $scope.action
       }
+      if($scope.action_queues && $scope.action === 'move'){
+        var last_move;
+        $scope.action_queues.forEach(function(aq){
+          if(aq.action_name === 'move'){
+            last_move = aq
+          }
+        });
+        if(last_move){
+          params.clearing_id = last_move.clearing_id;
+        }
+      }
       ActionQueue.create(params, function(player_info){
-        if($scope.action !== 'move'){
+        if($scope.action === 'move'){
+          $scope.set_circles(player_info);
+        }else if($scope.action === 'search' && player_info.clearing.movement_type === 'mountain') {
+          $scope.set_circles(player_info);
+        }else{
           $scope.action_queues = player_info.action_queues;
           $scope.action = '';
-        }else{
-          $scope.set_circles(player_info);
         }
         $scope.player_info = player_info;
+        $scope.update_buttons();
         $scope.ticker.resume();
       });
     };
@@ -124,13 +143,23 @@ angular.module('MagicRealm')
         action_name: $scope.action
       }
       ActionQueue.update(params, function(player_info){
-        $scope.action = '';
         $scope.remove_circles();
-        $scope.set_blue_circle()
         $scope.action_queues = player_info.action_queues;
         $scope.player_info = player_info;
-        $scope.move_player();
+        if($scope.action === 'move'){
+          $scope.set_blue_circle();
+          $scope.move_player();
+        }
+        $scope.action = '';
+        $scope.update_buttons();
         $scope.ticker.resume();
+      });
+    };
+    $scope.submit_actions = function(){
+      params = {id: $scope.payer_info.id}
+      Player.submit_actions(params, function(){
+        var toParams = {id: $scope.player_info.id}
+        $state.go('day_phase', toParams)
       });
     };
 
@@ -144,20 +173,33 @@ angular.module('MagicRealm')
         }
         $scope.action_queues = player_info.action_queues;
         $scope.player_info = player_info;
+        $scope.update_buttons();
       });
     };
 
     $scope.create_call = function(){
       if ($scope.player_info.action_queues.length === 0){
+        $scope.update_buttons();
         $scope.create_action($scope.player_info.id, $scope.player_info.clearing.id)
       }else{
         var action_queue = $scope.player_info.action_queues[$scope.player_info.action_queues.length-1]
+        $scope.update_buttons();
         $scope.create_action($scope.player_info.id, action_queue.clearing.id)
+      }
+    };
+    $scope.update_buttons = function(){
+      var action_queue = $scope.player_info.action_queues[$scope.player_info.action_queues.length-1]
+      var action = $scope.action === ''
+      if(action_queue){
+        $scope.move_b = !action_queue.can_move && action
+        $scope.hide_b = !action_queue.can_hide && action
+        $scope.rest_b = !action_queue.can_rest && action
+        $scope.search_b = !action_queue.can_search && action
       }
     };
     // Click functions
     $scope.move_action = function(){
-      $scope.ticker.pause();
+      // $scope.ticker.pause();
       $scope.action = 'move';
       $scope.create_call();
     };
@@ -186,11 +228,11 @@ angular.module('MagicRealm')
           value.update();
         }
       });
-      if(input.mouse.click && $scope.action == 'move') {
-        var clearingJson = $scope.traversable_clearings
+      if(input.mouse.click && ($scope.action === 'move' || $scope.action === 'search')) {
+        var clearingJson = $scope.target_clearings
 
         for (var i = 0; i < clearingJson.length; i++) {
-          var c = clearingJson[i].clearing
+          var c = clearingJson[i]
           var within_x = (c.x+20) > mouse.click.x && mouse.click.x > (c.x-20)
           var within_y = (c.y+20) > mouse.click.y && mouse.click.y > (c.y-20)
 
@@ -203,6 +245,6 @@ angular.module('MagicRealm')
       }
     };
     $scope.load_player()
-    $scope.ticker = scene.Ticker(25, paint);
+    $scope.ticker = scene.Ticker(10, paint);
     $scope.ticker.run();
 }]);

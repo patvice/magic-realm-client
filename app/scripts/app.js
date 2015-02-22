@@ -11,10 +11,8 @@
 var app = angular
   .module('MagicRealm', [
     'ui.router',
-    'ngAria',
+    'ui.bootstrap',
     'ngResource',
-    'ngSanitize',
-    'ngTouch',
     'jsonFormatter'
 ]);
 
@@ -34,10 +32,15 @@ app.config(function($stateProvider, $urlRouterProvider) {
       templateUrl: viewsPath+'setup.html',
       controller: 'SetupCtrl'
     })
-    .state('game', {
-      url: '/game/:id',
-      templateUrl: viewsPath+'game.html',
-      controller: 'GameCtrl'
+    .state('song_bird', {
+      url: '/game/song_bird/:id',
+      templateUrl: viewsPath+'song_bird.html',
+      controller: 'SongBirdCtrl'
+    })
+    .state('day_phase', {
+      url: '/game/day_phase/:id',
+      templateUrl: viewsPath+'day_phase.html',
+      controller: 'DayPhaseCtrl'
     });
 })
 .run(function($state, $rootScope) {
