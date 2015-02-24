@@ -28,6 +28,11 @@ app.config(function($stateProvider, $urlRouterProvider) {
       controller: 'MainCtrl'
     })
     .state('setup', {
+      url: '/setup',
+      templateUrl: viewsPath+'setup.html',
+      controller: 'SetupCtrl'
+    })
+    .state('setup_with_id', {
       url: '/setup/:id',
       templateUrl: viewsPath+'setup.html',
       controller: 'SetupCtrl'

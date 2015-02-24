@@ -50,11 +50,11 @@
     <div class="row mb30">
       <div class="col-md-4">
         <label for="">First Name</label>
-        <input class="form-control" ng-model="firstName" type="text" placeholder="first">
+        <input class="form-control" ng-model="first_name" type="text" placeholder="first">
       </div>
       <div class="col-md-4">
         <label for="">Last Name</label>
-        <input class="form-control" ng-model="lastName" type="text" placeholder="last">
+        <input class="form-control" ng-model="last_name" type="text" placeholder="last">
       </div>
     </div>
 
@@ -68,6 +68,20 @@
       <div class="col-md-6">
         <h4>All Done?</h4>
         <button class="btn btn-success btn-sm" ng-click="submit()">Vote to Start!</button>
+      </div>
+    </div>
+    <br>
+    <div ng-if="waiting" class="row m20">
+      <h4>
+        Waiting for other players to finish selecting...
+        <i class="fa fa-spinner fa-3x fa-spin"></i>
+      </h4>
+      <div ng-repeat='player in game.players'>
+        <h3>Player: {{player.first_name}} {{player.first_name}}</h3>
+        <h4>Class: {{player.character_class.name}}</h4>
+
+        <p ng-show="player.ready"><span class="label label-success">Ready</span></p>
+        <p ng-hide="player.ready"><span class="label label-danger">Not Ready</span></p>
       </div>
     </div>
   </div>

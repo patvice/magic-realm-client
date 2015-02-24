@@ -11,11 +11,13 @@ var url = 'http://localhost:3000/'
 // var url = #actually_url
 
 angular.module('MagicRealm')
-  .controller('SongBirdCtrl',['$scope','$window','$stateParams','ActionQueue','Player', function ($scope, $window, $stateParams, ActionQueue, Player) {
+  .controller('SongBirdCtrl',['$rootScope','$scope','$window','$state','$stateParams','ActionQueue','Player',
+  function ($rootScope, $scope, $window,$state, $stateParams, ActionQueue, Player) {
     var sjs = $window.sjs
     var game_height = 705;
     var game_width = 725;
-    var scene = sjs.Scene({w:game_width, h:game_height});
+    $rootScope.scene = sjs.Scene({w:game_width, h:game_height});
+    var scene = $rootScope.scene;
     var layer = scene.Layer('board', {useCanvas:false});
     var input = scene.Input();
 
@@ -27,6 +29,7 @@ angular.module('MagicRealm')
     background.move(0, 0);
 
     var clearing = scene.Layer('clearning', {useCanvas:true});
+    var buildings = scene.Layer('buildings', {userCanvas:true});
     var objects = scene.Layer('objects', {userCanvas:true})
 
     $scope.spriteObjects = {};
@@ -40,11 +43,30 @@ angular.module('MagicRealm')
 
     $scope.load_player = function() {
       Player.show({id: $stateParams.id}, function(player_info){
-        $scope.player_info = player_info
-        $scope.action_queues = player_info.action_queues
-        $scope.set_player(player_info)
-        $scope.set_other_players(player_info)
+        $scope.player_info = player_info;
+        $scope.action_queues = player_info.action_queues;
+        $scope.set_player(player_info);
+        $scope.set_other_players(player_info);
+        $scope.add_extras();
       });
+    };
+    //Random Stuff
+    $scope.add_extras = function(){
+      //Guard
+      $scope.spriteObjects.guard = buildings.Sprite('images/dwellings/guard.jpg')
+      $scope.spriteObjects.guard.position(518, 210);
+      //House
+      $scope.spriteObjects.house = buildings.Sprite('images/dwellings/house.jpg')
+      $scope.spriteObjects.house.position(620, 252);
+      //Inn
+      $scope.spriteObjects.inn = buildings.Sprite('images/dwellings/inn.jpg')
+      $scope.spriteObjects.inn.position(262, 362);
+      //Chapel
+      $scope.spriteObjects.chapel = buildings.Sprite('images/dwellings/chapel.jpg')
+      $scope.spriteObjects.chapel.position(308, 599);
+      // Ghost
+      $scope.spriteObjects.ghost = buildings.Sprite('images/monsters/ghost.jpg')
+      $scope.spriteObjects.ghost.position(136, 205);
     };
     // Player
     $scope.set_player = function(player_info){
@@ -57,6 +79,10 @@ angular.module('MagicRealm')
       var player_clearing = $scope.action_queues[$scope.action_queues.length-1].clearing;
       $scope.spriteObjects.player.position(player_clearing.x, player_clearing.y);
     };
+    $scope.reset_player = function(){
+      var player_clearing = $scope.player_info.clearing;
+      $scope.spriteObjects.player.position(player_clearing.x, player_clearing.y);
+    }
     $scope.set_other_players = function (player_info) {
       $scope.spriteObjects.other_players = [];
       player_info.game.players.forEach(function (player){
@@ -89,11 +115,17 @@ angular.module('MagicRealm')
       }
     };
     $scope.set_blue_circle = function(){
-      var sc = objects.Sprite('images/circle_start.gif')
+      var sc = clearing.Sprite('images/circle_start.gif')
       var player = $scope.spriteObjects.player
 
       sc.position(player.x, player.y);
       $scope.spriteObjects.start_clearings.push(sc);
+    };
+    $scope.remove_start_clearings = function(){
+      for (var i = 0; i < $scope.spriteObjects.start_clearings.length; i++) {
+        $scope.spriteObjects.start_clearings[i].remove();
+      }
+      $scope.spriteObjects.start_clearings = [];
     };
     $scope.remove_circles = function (){
       for (var i = 0; i < $scope.spriteObjects.circles.length; i++) {
@@ -106,7 +138,9 @@ angular.module('MagicRealm')
       var params = {
         player_id: p_id,
         clearing_id: c_id,
-        action_name: $scope.action
+        action_name: $scope.action,
+        turn: $scope.player_info.game.turn,
+        action_this_turn: ($scope.action_queues.length+1)
       }
       if($scope.action_queues && $scope.action === 'move'){
         var last_move;
@@ -156,13 +190,16 @@ angular.module('MagicRealm')
       });
     };
     $scope.submit_actions = function(){
-      params = {id: $scope.payer_info.id}
+      var params = {id: $scope.player_info.id}
       Player.submit_actions(params, function(){
+        $scope.cleanup_objects();
         var toParams = {id: $scope.player_info.id}
         $state.go('day_phase', toParams)
       });
     };
-
+    $scope.cleanup_objects = function(){
+      scene.reset();
+    };
     $scope.delete_action = function(){
       var params = {id: $scope.player_info.id};
       Player.destroy_last_action(params, function(player_info){

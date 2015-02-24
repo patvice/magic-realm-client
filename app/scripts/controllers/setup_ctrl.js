@@ -8,8 +8,9 @@
  * Controller of the comp3004App
  */
 angular.module('MagicRealm')
-.controller('SetupCtrl',['$scope', '$state', '$stateParams', 'Player', function ($scope, $state, $stateParams, Player) {
-  var base_url = 'images/charater_sheets/'
+.controller('SetupCtrl',['$scope', '$state', '$stateParams','Game', 'Player', function ($scope, $state, $stateParams, Game, Player) {
+
+  var base_url = 'images/charater_sheets/';
   $scope.id = 0;
   $scope.champ_info =
     [
@@ -32,26 +33,48 @@ angular.module('MagicRealm')
     ]
 
     $scope.selected_info = {};
+    $scope.waiting = false;
     $scope.showForm = false;
     $scope.selected_champ = 0;
     $scope.selected_champ_name = "";
     $scope.firstName = "";
     $scope.lastName = "";
+
     $scope.great_treasures_vps = 0;
     $scope.usable_spells_vps = 0;
     $scope.fame_vps = 0;
     $scope.notoriety_vps = 0;
     $scope.gold_vps = 0;
+
     $scope.lessThenFive = false;
 
+    $scope.set_game_id = function(){
+      console.log($stateParams.id);
+      if($stateParams.id === undefined){
+        Game.create(function(game){
+          $scope.game_id = game.id
+          $scope.create_player()
+        });
+      }else{
+        $scope.game_id = $stateParams.id;
+        $scope.create_player()
+      }
+    }
+    $scope.create_player = function(){
+      var params = {game_id: $scope.game_id}
+      Player.create(params, function(player){
+        $scope.player_id = player.id
+      });
+    };
+
     $scope.next = function (){
-      $scope.id++;
+      $scope.id += 1;
       if($scope.id == 16){
         $scope.id = 0;
       }
     };
     $scope.prev = function (){
-      $scope.id--;
+      $scope.id -= 1;
       if($scope.id == -1){
         $scope.id = 15;
       }
@@ -72,15 +95,17 @@ angular.module('MagicRealm')
     }
 
     $scope.submit = function (){
-      var sum = $scope.great_treasures_vps + $scope.usable_spells_vps + $scope.fame_vps + $scope.notoriety_vps + $scope.gold_vps;
-      if(sum < 5){
+      var sum = parseInt($scope.great_treasures_vps) + parseInt($scope.usable_spells_vps) + parseInt($scope.fame_vps) + parseInt($scope.notoriety_vps) + parseInt($scope.gold_vps);
+      console.log(sum);
+      if(sum < 5 || sum > 5){
         $scope.lessThenFive = true;
         return;
       }
 
       var params = {
-        game_id: $stateParams.id,
-        charater_id: $scope.id,
+        id: $scope.player_id,
+        game_id: $scope.game_id,
+        character_class_id: $scope.selected_champ,
         first_name: $scope.first_name,
         last_name: $scope.last_name,
         great_treasures_vps: $scope.great_treasures_vps,
@@ -88,14 +113,34 @@ angular.module('MagicRealm')
         fame_vps: $scope.fame_vps,
         notoriety_vps: $scope.notoriety_vps,
         gold_vps: $scope.gold_vps,
+        ready: true
       }
 
-      Player.create(params, function(player){
-        console.log("CREATED")
-        console.log(player);
-        var toParams = {id: player.id}
-        $state.go('song_bird', toParams)
+      Player.update(params, function(player){
+        $scope.player_id = player.id
+        $scope.waiting = true;
+        $scope.get_player();
+        $scope.wait_for_other_players();
       });
     }
 
+    $scope.get_player = function(){
+      var params = {id: $scope.game_id};
+      Game.show(params, function(game){
+        $scope.game = game
+        if(game.time_of_day === 'birdsong'){
+          var toParams = {id: $scope.player_id}
+          $state.go('song_bird', toParams)
+          clearInterval($scope.interval);
+        }
+      });
+    };
+
+    $scope.wait_for_other_players = function(){
+      console.log('INSIDE HERE');
+      $scope.interval = setInterval(function(){
+        $scope.get_player();
+      },5000);
+    }
+    $scope.set_game_id();
 }]);
