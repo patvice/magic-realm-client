@@ -1,7 +1,7 @@
 'use strict';
 
-var url = 'http://127.0.0.1:3000/'
-// var url = #actually_url
+// var url = 'http://127.0.0.1:3000/'
+var url = 'https://shielded-beach-1174.herokuapp.com/'
 
 angular.module('MagicRealm')
   .service('Game',[ '$resource', function($resource){

@@ -1,7 +1,7 @@
 'use strict';
 
-var url = 'http://localhost:3000/'
-// var url = #actually_url
+// var url = 'http://localhost:3000/'
+var url = 'https://shielded-beach-1174.herokuapp.com/'
 
 angular.module('MagicRealm')
   .service('Player',[ '$resource', function($resource){
@@ -17,6 +17,3 @@ angular.module('MagicRealm')
       end_turn: {method: 'GET', params:{id: '@id', action:'end_turn'}}
     });
 }]);
-
-//http://localhost:3000/players/1/move_clearing
-//http://localhost:3000/players/1/move_clearing
