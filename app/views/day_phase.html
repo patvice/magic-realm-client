@@ -1,50 +1,9 @@
 <div class="col-md-5 pull-left">
   <div class="row m20">
-    <h2>Day Phase!</h2>
-    <div class="mt10">
-      <button ng-disabled="next_action_b"ng-click="next_action()" class="btn btn-success btn-large">
-        Next Action
-      </button>
-      <button ng-disabled="next_turn_b" ng-click="end_turn()" class="btn btn-primary btn-large">
-        Next Turn <i class="fa fa-chevron-right"></i>
-      </button>
-    </div>
-  </div>
-  <div ng-if="waiting" class="row m20">
-    <p>Current Players Turn: {{player.game.current_players_turn}}</p>
-    <p>Waiting for other players to finish there turn...<i class="fa fa-spinner fa-spin"></i></p>
-  </div>
-
-  <div class="row m20">
-    <h2>Actions Planed</h2>
-    <div ng-repeat="action in action_queues" >
-      <p>
-        Action#:{{$index + 1}} - {{action.action_name}} - Cleaing: {{action.clearing_id}}
-        <span ng-if="action.completed"><i class="fa fa-check green"></i></span>
-      </p>
-    </div>
-  </div>
-
-  <hr>
-  <div class="row m20">
-    <h2>Notifications</h2>
-    <p ng-if='notifications.length === 0'>No notifications yet</p>
-    <div ng-repeat="note in notifications">
-      <p>
-        {{note.action}}
-      </p>
-    </div>
-  </div>
-
-  <hr>
-  <div class="row m20">
-    <json-formatter json="player_info" open="1"></json-formatter>
-  </div>
-  <hr>
-  <div call="row m20">
-    <button class="btn btn-default" ng-click="open()">Open me!</button>
-    <button class="btn btn-default" ng-click="open('lg')">Large modal</button>
-    <button class="btn btn-default" ng-click="open('sm')">Small modal</button>
-    <div ng-show="selected">Selection from a modal: {{ selected }}</div>
+    <h2>Last click</h2>
+    <p>{{x_y}}</p>
+    <br>
+    <h2>Mouse X , Y</h2>
+    <p>{{x_m}} {{y_m}}</p>
   </div>
 </div>
