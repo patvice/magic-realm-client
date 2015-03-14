@@ -11,22 +11,32 @@ var url = 'http://localhost:3000/'
 // var url = #actually_url
 
 angular.module('MagicRealm')
-  .controller('SongBirdCtrl',['$rootScope','$scope','$window','$state','$stateParams','ActionQueue','Player',
-  function ($rootScope, $scope, $window,$state, $stateParams, ActionQueue, Player) {
-    var sjs = $window.sjs
-    var game_height = 705;
+  .controller('SongBirdCtrl',[
+  //-------------------
+    // '$rootScope',
+    '$scope',
+    '$window',
+    '$state',
+    '$stateParams',
+    'spriteJs',
+    'ActionQueue',
+    'Player',
+    'MapBuilder',
+  //-------------------
+  function ($scope, $window, $state, $stateParams, spriteJs, ActionQueue, Player, MapBuilder) {
+
+    var sjs = spriteJs
+    var game_height = 650;
     var game_width = 725;
-    $rootScope.scene = sjs.Scene({w:game_width, h:game_height});
-    var scene = $rootScope.scene;
-    var layer = scene.Layer('board', {useCanvas:false});
+    var scene = sjs.Scene({w:game_width, h:game_height});
     var input = scene.Input();
 
     sjs.debug = true;
 
     var mouse = input.mouse
 
-    var background = layer.Sprite('images/map-v2-clean.gif');
-    background.move(0, 0);
+    var board = scene.Layer('board', {useCanvas:false});
+    $scope.background = MapBuilder.generateBoard(board);
 
     var clearing = scene.Layer('clearning', {useCanvas:true});
     var buildings = scene.Layer('buildings', {userCanvas:true});
@@ -37,8 +47,11 @@ angular.module('MagicRealm')
     $scope.x_mouse = 0;
     $scope.y_mouse = 0;
     $scope.x_y_mouse = "0, 0";
+    $scope.offSetX = 0;
+    $scope.offSetY = 0;
 
-    $scope.move_circle = function (x, y){
+
+    var move_circle = function (x, y){
       $scope.x_mouse = mouse.position.x;
       $scope.y_mouse = mouse.position.y;
       $scope.$apply()
@@ -47,7 +60,7 @@ angular.module('MagicRealm')
     };
 
     var paint = function() {
-      background.update();
+      MapBuilder.update($scope.background);
       Object.keys(spriteObjects).forEach(function (key) {
         var value = spriteObjects[key]
         if(Array.isArray(value)){
@@ -58,15 +71,19 @@ angular.module('MagicRealm')
           value.update();
         }
       });
-      if(input.mouse.click) {
-        $scope.lasted_clicked();
-      }
+
+
       if(mouse.position.x !== $scope.x_mouse && mouse.position.y !== $scope.y_mouse){
-        $scope.move_circle(mouse.position.x, mouse.position.y)
+        move_circle(mouse.position.x, mouse.position.y)
       }
+      if(input.keyboard.up)   { $scope.offSetY -= MapBuilder.move($scope.background, 0, 5) }
+      if(input.keyboard.down) { $scope.offSetY -= MapBuilder.move($scope.background, 0, -5) }
+      if(input.keyboard.left) { $scope.offSetX -= MapBuilder.move($scope.background, 5, 0) }
+      if(input.keyboard.right){ $scope.offSetX -= MapBuilder.move($scope.background, -5, 0) }
+      if(mouse.click)   { lasted_clicked() }
     };
-    $scope.lasted_clicked = function(){
-      $scope.x_y_mouse = mouse.position.x+", "+mouse.position.y;
+    var lasted_clicked = function(){
+      $scope.x_y_mouse = (mouse.position.x+$scope.offSetX)+", "+(mouse.position.y+$scope.offSetY);
       $scope.$apply();
     }
 

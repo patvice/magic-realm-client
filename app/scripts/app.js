@@ -13,7 +13,8 @@ var app = angular
     'ui.router',
     'ui.bootstrap',
     'ngResource',
-    'jsonFormatter'
+    'jsonFormatter',
+    'SpriteJSLib'
 ]);
 
 var viewsPath = 'views/';
@@ -57,6 +58,15 @@ app.config(['$httpProvider', function($httpProvider) {
         $httpProvider.defaults.useXDomain = true;
         delete $httpProvider.defaults.headers.common['X-Requested-With'];
     }
+]);
+
+angular.module('SpriteJSLib', []).factory('spriteJs', ['$window',
+  function ($window) {
+    if(typeof $window.sjs === 'undefined'){
+      throw 'Spritejs not found.';
+    }
+    return $window.sjs
+  }
 ]);
 
 
