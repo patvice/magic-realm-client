@@ -10,18 +10,19 @@ angular.module('MagicRealm')
       var background = []
       var board = MapInfo.board
 
-      angular.forEach(board, function(tile){
+      angular.forEach(board, function(tileF){
         var options = {
-          x: tile.x,
-          y: tile.y,
-          rotation: tile.rotation,
+          x: tileF.x,
+          y: tileF.y,
           xscale: 0.50,
           yscale: 0.50
         }
-        console.log(tile.imageUrl);
-        var tile = layer.Sprite( tile.imageUrl , options)
+        console.log(tileF.imageUrl);
+        var tile = layer.Sprite( tileF.imageUrl , options)
+        tile.rotate(tileF.rotation)
         background.push(tile)
       })
+
       console.log(background);
       return background;
     }
