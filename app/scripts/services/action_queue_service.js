@@ -8,5 +8,6 @@ angular.module('MagicRealm')
     return $resource(url+'action_queues/:id', null ,{
       create: {method: 'POST'},
       update: {method: 'PUT', params:{id: '@id'} },
+      destroy: {method: 'DELETE', params:{id: '@id'}}
     });
 }]);

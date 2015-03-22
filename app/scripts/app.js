@@ -14,7 +14,8 @@ var app = angular
     'ui.bootstrap',
     'ngResource',
     'jsonFormatter',
-    'SpriteJSLib'
+    'SpriteJSLib',
+    'underscore'
 ]);
 
 var viewsPath = 'views/';
@@ -68,5 +69,12 @@ angular.module('SpriteJSLib', []).factory('spriteJs', ['$window',
     return $window.sjs
   }
 ]);
-
+angular.module('underscore', []).factory('_', ['$window',
+  function ($window) {
+    if(typeof $window._ === 'undefined'){
+      throw 'Underscore was not found.';
+    }
+    return $window._
+  }
+]);
 

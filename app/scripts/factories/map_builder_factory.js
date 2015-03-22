@@ -17,13 +17,10 @@ angular.module('MagicRealm')
           xscale: 0.50,
           yscale: 0.50
         }
-        console.log(tileF.imageUrl);
         var tile = layer.Sprite( tileF.imageUrl , options)
         tile.rotate(tileF.rotation)
         background.push(tile)
       })
-
-      console.log(background);
       return background;
     }
 
