@@ -1,0 +1,85 @@
+<div class="row m20">
+  <h2>Fight: Round {{fight.queue.fight_round}}</h2>
+  <h3>Attackers</h3>
+  <div class="row m20">
+    <div class="col-md-2" ng-repeat="actor in fight.otherActors">
+      <img ng-src="{{actor.img_src}}">
+      <div ng-if="actor.player === null">
+        <p>Name: {{actor.monster.name}}</p>
+        <p>Wounds: {{actor.monster.wounds}}</p>
+        <p>Fatigue: {{actor.monster.fatigue}}</p>
+        <p>Till Death: {{actor.monster.wounds + (actor.monster.fatigue/2)}} / {{actor.monster.vulnerability}}</p>
+      </div>
+      <div ng-if="actor.monster === null">
+        <p>Name: {{actor.player.name}}</p>
+        <p>Wounds: {{actor.player.wounds}}</p>
+        <p>Fatigue: {{actor.player.fatigue}}</p>
+        <p>Till Death: {{(actor.player.wounds + (actor.player.fatigue/2))}} / 12</p>
+      </div>
+
+    </div>
+  </div>
+  <hr>
+  <div class="row m20">
+    <div class='col-md-6'>
+      <div ng-if="phase === 'waiting'">
+        Waiting for other player(s) ... <i class=""></i>
+        <p ng-repeat="player in playersNotReady">{{players}}</p>
+      </div>
+      <div ng-if="phase === 'select'">
+        <h3>Select Actions This Round</h3>
+        <p>Attack:
+          {{attack}}
+          <select name="attack" ng-model="attack">
+            <option value="thurst">Thurst</option>
+            <option value="swing">Swing</option>
+            <option value="smash">Smash</option>
+            </option>
+          </select>
+        </p>
+
+        <p>Defence:
+        {{defence}}
+          <select name='defence' ng-model="defence">
+            <option value="charge">Charge</option>
+            <option value="dodge">Dodge</option>
+            <option value="duck">Duck</option>
+            </option>
+          </select>
+        </p>
+        <p>Target:
+        {{target}}
+          <select name="target" ng-model="target">
+            <option ng-repeat="actor in fight.otherActors" value="{{actor.id}}">
+              <span ng-if="actor.player === null">{{actor.monster.name}}</span>
+              <span ng-if="actor.monster === null">{{actor.player.name}}</span>
+            </option>
+          </select>
+        </p>
+        <button class="btn btn-success" ng-click="submitFight(attack,defence,target)">Submit</button>
+      </div>
+      <div ng-if="phase === 'continue_or_run'">
+        <h3>Continue Fighting?</h3>
+        <p>Choice:
+          <select ng-model="choice">
+            <option value="continue">Continue Fighting</option>
+            <option value="runaway">Try to Run Away</option>
+            <option value="duck">Agree to Stop</option>
+            </option>
+          </select>
+        </p>
+        <button class="btn btn-success" ng-click="submitChoice(choice)">Submit</button>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h3>Notifications</h3>
+      <p ng-if="notificaitons !== null" ng-repeat="notes in notificaionts">{{note.action}}</p>
+      <p ng-if="notificaiotns === null">No notificaitons at this time</p>
+    </div>
+  </div>
+
+
+  <div class="row t20">
+   <json-formatter json="fight" open="1"></json-formatter>
+  </div>
+</div>

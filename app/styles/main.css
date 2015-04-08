@@ -3,6 +3,11 @@ body {
   padding-top: 20px;
   padding-bottom: 20px;
 }
+.sjs {
+  float:left;
+  /*border:3px #bbb solid;*/
+  margin:10px;
+}
 
 .m20 {
   margin: 20px;

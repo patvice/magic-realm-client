@@ -19,6 +19,7 @@ angular.module('MagicRealm')
         }
         var tile = layer.Sprite( tileF.imageUrl , options)
         tile.rotate(tileF.rotation)
+        tile.name = tileF.name
         background.push(tile)
       })
       return background;
@@ -41,10 +42,29 @@ angular.module('MagicRealm')
       }
     };
 
+    var enchantTile = function(board, tileName){
+      angular.forEach(board, function(tile) {
+        if(tile.name === tileName){
+          var re = /-e1/
+          var m = re.exec(tile.src)
+          if(m === null){
+            tile.loadImg('images/board/'+tileName+'-e1.gif');
+            tile.update();
+            console.log('e1: '+tile)
+          }else{
+            tile.loadImg('images/board/'+tileName+'1.gif');
+            tile.update();
+            console.log('1: '+tile)
+          }
+        }
+      });
+    };
+
     return{
       generateBoard: generateBoard,
       update: update,
       move: move,
+      enchantTile: enchantTile
     }
 }]);
 

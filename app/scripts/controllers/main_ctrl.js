@@ -1,17 +1,18 @@
 'use strict';
 
-/**
- * @ngdoc function
- * @name comp3004App.controller:MainCtrl
- * @description
- * # MainCtrl
- * Controller of the comp3004App
- */
 angular.module('MagicRealm')
-.controller('MainCtrl',['$scope', 'Game', function ($scope, Game) {
+.controller('MainCtrl',['$scope','$state', 'GameService', function ($scope, $state, Game) {
   $scope.games = []
 
   Game.index( function(games){
+    console.log(games)
     $scope.games = games
   })
+
+  $scope.setup = function(){
+    Game.create(function(game){
+      var params = {id: game.id}
+      $state.go('setup_with_id', params)
+    });
+  }
 }]);
