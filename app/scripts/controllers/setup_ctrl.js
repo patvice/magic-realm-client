@@ -1,16 +1,10 @@
 'use strict';
 
-/**
- * @ngdoc function
- * @name comp3004App.controller:SetupCtrl
- * @description
- * # MainCtrl
- * Controller of the comp3004App
- */
 angular.module('MagicRealm')
-.controller('SetupCtrl',['$scope', '$state', '$stateParams','Game', 'Player', function ($scope, $state, $stateParams, Game, Player) {
+.controller('SetupCtrl',['$scope', '$state', '$stateParams','GameService', 'PlayerService', function ($scope, $state, $stateParams, Game, Player) {
 
   var base_url = 'images/charater_sheets/';
+
   $scope.id = 0;
   $scope.champ_info =
     [
@@ -129,7 +123,7 @@ angular.module('MagicRealm')
       Game.show(params, function(game){
         $scope.game = game
         if(game.time_of_day === 'birdsong'){
-          var toParams = {id: $scope.player_id}
+          var toParams = {game_id: $scope.game.id, player_id: $scope.player_id}
           $state.go('song_bird', toParams)
           clearInterval($scope.interval);
         }

@@ -1,287 +1,295 @@
 'use strict';
 
-/**
- * @ngdoc function
- * @name comp3004App.controller:GameCtrl
- * @description
- * # MainCtrl
- * Controller of the comp3004App
- */
 var url = 'http://localhost:3000/'
 // var url = #actually_url
 
 angular.module('MagicRealm')
-  .controller('SongBirdCtrl',['$rootScope','$scope','$window','$state','$stateParams','ActionQueue','Player',
-  function ($rootScope, $scope, $window,$state, $stateParams, ActionQueue, Player) {
-    var sjs = $window.sjs
-    var game_height = 705;
-    var game_width = 725;
-    $rootScope.scene = sjs.Scene({w:game_width, h:game_height});
-    var scene = $rootScope.scene;
-    var layer = scene.Layer('board', {useCanvas:false});
-    var input = scene.Input();
+  .controller('SongBirdCtrl',[
+  //-------------------
+    '$scope',
+    '$state',
+    '$stateParams',
+    '$modal',
+    '$http',
+    '_',
+    'Player',
+    'Game',
+    'Sjs',
+    'Fight',
+  //-------------------
+  function ($scope, $state, $stateParams, $modal, $http, _, Player, Game, Sjs, Fight) {
+    $scope.dice = '0';
+    $scope.block = false;
+    $scope.action = ''
+    $scope.phase = 'birdsong'
+    $scope.notifications = [];
+    $scope.waiting = false;
+    $scope.next_action_b = false;
+    $scope.next_turn_b = true;
+    $scope.goldPile = 'null';
+    $scope.tilesToReverse = [];
 
-    sjs.debug = true;
-
-    var mouse = input.mouse
-
-    var background = layer.Sprite('images/map-v2-clean.gif');
-    background.move(0, 0);
-
-    var clearing = scene.Layer('clearning', {useCanvas:true});
-    var buildings = scene.Layer('buildings', {userCanvas:true});
-    var objects = scene.Layer('objects', {userCanvas:true})
-
-    $scope.spriteObjects = {};
-    $scope.spriteObjects.start_clearings = [];
-    $scope.action = '';
-
-    $scope.move_b = false;
-    $scope.hide_b = false;
-    $scope.rest_b = false;
-    $scope.search_b = false;
-
-    $scope.load_player = function() {
-      Player.show({id: $stateParams.id}, function(player_info){
-        $scope.player_info = player_info;
-        $scope.action_queues = player_info.action_queues;
-        $scope.set_player(player_info);
-        $scope.set_other_players(player_info);
-        $scope.add_extras();
-      });
-    };
-    //Random Stuff
-    $scope.add_extras = function(){
-      //Guard
-      $scope.spriteObjects.guard = buildings.Sprite('images/dwellings/guard.jpg')
-      $scope.spriteObjects.guard.position(518, 210);
-      //House
-      $scope.spriteObjects.house = buildings.Sprite('images/dwellings/house.jpg')
-      $scope.spriteObjects.house.position(620, 252);
-      //Inn
-      $scope.spriteObjects.inn = buildings.Sprite('images/dwellings/inn.jpg')
-      $scope.spriteObjects.inn.position(262, 362);
-      //Chapel
-      $scope.spriteObjects.chapel = buildings.Sprite('images/dwellings/chapel.jpg')
-      $scope.spriteObjects.chapel.position(308, 599);
-      // Ghost
-      $scope.spriteObjects.ghost = buildings.Sprite('images/monsters/ghost.jpg')
-      $scope.spriteObjects.ghost.position(136, 205);
-    };
-    // Player
-    $scope.set_player = function(player_info){
-      $scope.spriteObjects.player = objects.Sprite('images/charater_icons/chr_'+player_info.character_class.name+'.jpg')
-      var player_clearing = player_info.clearing;
-
-      $scope.spriteObjects.player.position(player_clearing.x, player_clearing.y);
-    };
-    $scope.move_player = function(player_info){
-      var player_clearing = $scope.action_queues[$scope.action_queues.length-1].clearing;
-      $scope.spriteObjects.player.position(player_clearing.x, player_clearing.y);
-    };
-    $scope.reset_player = function(){
-      var player_clearing = $scope.player_info.clearing;
-      $scope.spriteObjects.player.position(player_clearing.x, player_clearing.y);
-    }
-    $scope.set_other_players = function (player_info) {
-      $scope.spriteObjects.other_players = [];
-      player_info.game.players.forEach(function (player){
-        if(player.id !== parseInt($stateParams.id)){
-          var p = objects.Sprite('images/charater_icons/chr_'+player.character_class.name+'.jpg')
-          p.position(player.clearing.x, player.clearing.y)
-          $scope.spriteObjects.other_players.push(p)
+    //Game Setup
+    var load_player = function() {
+      $scope.player = new Player($stateParams.player_id);
+      $scope.game = new Game($stateParams.game_id);
+      $scope.game.getGameInfo(function(game){
+        console.log(game)
+        if(game.turn === 29){
+          window.location = 'http://localhost:3000/games/'+$scope.game.id+"/winning"
+          return
         }
-      });
-    };
-    $scope.remove_other_players = function(){
-      $scope.spriteObjects.other_players.forEach(function (player){
-        player.remove()
-      });
-      $scope.spriteObjects.other_players = [];
-    };
-
-    // Clearing
-    $scope.set_circles = function(player_info){
-      var action_queues = player_info.action_queues
-      var clearingJson = action_queues[action_queues.length-1].clearings
-      $scope.target_clearings = clearingJson
-
-      $scope.spriteObjects.circles = [];
-      for (var i = 0; i < clearingJson.length; i++) {
-        var circle = clearing.Sprite('images/circle.gif');
-        var c = clearingJson[i]
-        circle.position(c.x, c.y);
-        $scope.spriteObjects.circles.push(circle)
-      }
-    };
-    $scope.set_blue_circle = function(){
-      var sc = clearing.Sprite('images/circle_start.gif')
-      var player = $scope.spriteObjects.player
-
-      sc.position(player.x, player.y);
-      $scope.spriteObjects.start_clearings.push(sc);
-    };
-    $scope.remove_start_clearings = function(){
-      for (var i = 0; i < $scope.spriteObjects.start_clearings.length; i++) {
-        $scope.spriteObjects.start_clearings[i].remove();
-      }
-      $scope.spriteObjects.start_clearings = [];
-    };
-    $scope.remove_circles = function (){
-      for (var i = 0; i < $scope.spriteObjects.circles.length; i++) {
-        $scope.spriteObjects.circles[i].remove();
-      }
-      $scope.spriteObjects.circles = [];
-    };
-
-    $scope.create_action = function(p_id, c_id){
-      var params = {
-        player_id: p_id,
-        clearing_id: c_id,
-        action_name: $scope.action,
-        turn: $scope.player_info.game.turn,
-        action_this_turn: ($scope.action_queues.length+1)
-      }
-      if($scope.action_queues && $scope.action === 'move'){
-        var last_move;
-        $scope.action_queues.forEach(function(aq){
-          if(aq.action_name === 'move'){
-            last_move = aq
-          }
+        $scope.phase = $scope.game.gameInfo.time_of_day
+        $scope.notifications = game.notifications
+        $scope.player.getPlayerInfo(function(player){
+            $scope.sjs = new Sjs($scope.player, $scope.game.gameInfo, updateMove, updateGoldPiles);
+            $scope.actionQueues = $scope.player.actionQueues;
+            $scope.updateButtons();
         });
-        if(last_move){
-          params.clearing_id = last_move.clearing_id;
-        }
+      });
+    };
+
+    var reset_player = function() {
+      $scope.game.getGameInfo(function(game){
+        $scope.phase = $scope.game.gameInfo.time_of_day
+        $scope.notifications = game.notifications
+        $scope.player.getPlayerInfo(function(player){
+            $scope.sjs.removeAndSetTreasures(player.found_clearings)
+            $scope.actionQueues = $scope.player.actionQueues;
+            $scope.updateButtons();
+        });
+      });
+    };
+
+    var updateGoldPiles = function(clearing_id){
+      if(clearing_id === 0){return;}
+      $scope.game.showClearingTreasures(clearing_id, function(goldPile){
+        $scope.goldPile = goldPile
+        $scope.treasures = goldPile.treasure_names
+      });
+    }
+
+    //BirdSong functions
+    $scope.updateButtons = function(){
+      if($scope.actionQueues.length === 0 && $scope.phase === 'daylight'){
+        $scope.next_action_b = true;
+        $scope.next_turn_b = false;
       }
-      ActionQueue.create(params, function(player_info){
-        if($scope.action === 'move'){
-          $scope.set_circles(player_info);
-        }else if($scope.action === 'search' && player_info.clearing.movement_type === 'mountain') {
-          $scope.set_circles(player_info);
+
+      var actionQueue = _.last($scope.actionQueues)
+      var blank = $scope.action === ''
+      if(actionQueue){
+        $scope.move_b = !actionQueue.buttons.move_b && !blank
+        $scope.hide_b = !actionQueue.buttons.hide_b && !blank
+        $scope.rest_b = !actionQueue.buttons.rest_b && !blank
+        $scope.loot_b = !actionQueue.buttons.loot_b && !blank
+        $scope.search_b = !actionQueue.buttons.search_b && !blank
+        $scope.enchant_b = !actionQueue.buttons.enchant_b && !blank
+      }
+    };
+    $scope.clickAction = function(action){
+      $scope.action = action;
+      createAction();
+    }
+
+    var createAction = function(){
+      var params = {
+        player_id: $scope.player.playerInfo.id,
+        action_name: $scope.action,
+        clearing_id: $scope.player.lastMoveId,
+        turn: $scope.game.gameInfo.turn
+      }
+      $scope.player.createAction(params, function(){
+        var newAction = _.last($scope.player.actionQueues)
+        $scope.updateButtons();
+        if(newAction.action_name === 'move'){
+          $scope.sjs.setBlueCircles(newAction.clearings)
+        }else if(newAction.action_name === 'enchant'){
+          $scope.sjs.enchantTile(newAction.clearing.tile.name)
+          $scope.tilesToReverse.push(newAction.clearing.tile.name)
+        }else if(newAction.action_name === 'search' && newAction.clearing.movement_type === 'mountain'){
+          $scope.sjs.setBlueCircles(newAction.clearings)
         }else{
-          $scope.action_queues = player_info.action_queues;
+          $scope.actionQueues = $scope.player.actionQueues;
           $scope.action = '';
         }
-        $scope.player_info = player_info;
-        $scope.update_buttons();
-        $scope.ticker.resume();
       });
-    };
-    // Moving Clearing / Post Players
-    $scope.update_action = function(p_id, c_id){
-      var action_queues = $scope.player_info.action_queues
+    }
+    var updateMove = function(clearing_id){
       var params = {
-        id: action_queues[action_queues.length-1].id,
-        player_id: p_id,
-        clearing_id: c_id,
-        action_name: $scope.action
+        id: _.last($scope.player.actionQueues).id,
+        player_id: $scope.player.playerInfo.id,
+        clearing_id: clearing_id,
       }
-      ActionQueue.update(params, function(player_info){
-        $scope.remove_circles();
-        $scope.action_queues = player_info.action_queues;
-        $scope.player_info = player_info;
-        if($scope.action === 'move'){
-          $scope.set_blue_circle();
-          $scope.move_player();
-        }
+      $scope.player.updateAction(params, function(){
+        var lastAction = _.last($scope.player.actionQueues);
+        $scope.sjs.movePlayerSB(lastAction.clearing.x, lastAction.clearing.y, $scope.action);
+        $scope.sjs.removeBlueCircles();
         $scope.action = '';
-        $scope.update_buttons();
-        $scope.ticker.resume();
       });
-    };
-    $scope.submit_actions = function(){
-      var params = {id: $scope.player_info.id}
-      Player.submit_actions(params, function(){
-        $scope.cleanup_objects();
-        var toParams = {id: $scope.player_info.id}
-        $state.go('day_phase', toParams)
-      });
-    };
-    $scope.cleanup_objects = function(){
-      scene.reset();
-    };
-    $scope.delete_action = function(){
-      var params = {id: $scope.player_info.id};
-      Player.destroy_last_action(params, function(player_info){
-        if($scope.action_queues[$scope.action_queues.length-1].action_name === 'move'){
-          var circle = $scope.spriteObjects.start_clearings.pop();
-          $scope.spriteObjects.player.position(circle.x, circle.y)
-          circle.remove();
-        }
-        $scope.action_queues = player_info.action_queues;
-        $scope.player_info = player_info;
-        $scope.update_buttons();
-      });
+    }
+
+    //Birdsong to Daylight
+    $scope.submitActions = function(){
+      $scope.player.submitAction();
+      $scope.wait_for_next_phase('daylight', 'waitingOtherTurn');
+      $scope.sjs.removeGreenCircles();
+      $scope.sjs.movePlayer($scope.player.playerInfo.clearing.x, $scope.player.playerInfo.clearing.y)
+      $scope.sjs.reverseTiles($scope.tilesToReverse)
+      $scope.phase = 'waitingDaylight'
     };
 
-    $scope.create_call = function(){
-      if ($scope.player_info.action_queues.length === 0){
-        $scope.update_buttons();
-        $scope.create_action($scope.player_info.id, $scope.player_info.clearing.id)
-      }else{
-        var action_queue = $scope.player_info.action_queues[$scope.player_info.action_queues.length-1]
-        $scope.update_buttons();
-        $scope.create_action($scope.player_info.id, action_queue.clearing.id)
-      }
-    };
-    $scope.update_buttons = function(){
-      var action_queue = $scope.player_info.action_queues[$scope.player_info.action_queues.length-1]
-      var action = $scope.action === ''
-      if(action_queue){
-        $scope.move_b = !action_queue.can_move && action
-        $scope.hide_b = !action_queue.can_hide && action
-        $scope.rest_b = !action_queue.can_rest && action
-        $scope.search_b = !action_queue.can_search && action
-      }
-    };
-    // Click functions
-    $scope.move_action = function(){
-      // $scope.ticker.pause();
-      $scope.action = 'move';
-      $scope.create_call();
-    };
-    $scope.hide_action = function(){
-      $scope.action = 'hide';
-      $scope.create_call();
-    };
-    $scope.rest_action = function(){
-      $scope.action = 'rest';
-      $scope.create_call();
-    };
-    $scope.search_action = function(){
-      $scope.action = 'search';
-      $scope.create_call();
-    };
+    //Interval Methods
+    $scope.wait_for_next_phase = function(phase, nextPhase){
+      $scope.interval = setInterval(function(){
+        $scope.game.getTimeOfDay(function(timeOfDay){
+          if(_.first(timeOfDay) === phase){
+            clearInterval($scope.interval);
+            $scope.phase = nextPhase;
+            if(phase === 'birdsong'){
+              reset_player();
+            }else{
+              $scope.wait_for_other_players('');
 
-    var paint = function() {
-      background.update();
-      Object.keys($scope.spriteObjects).forEach(function (key) {
-        var value = $scope.spriteObjects[key]
-        if(Array.isArray(value)){
-          value.forEach(function(v){
-            v.update();
-          });
-        }else{
-          value.update();
+            }
+          }
+        });
+      },5000);
+    }
+    $scope.wait_for_other_players = function(nextPhase){
+      $scope.interval = setInterval(function(){
+        $scope.game.currentPlayer(function(gameInfo){
+          if(gameInfo.time_of_day === nextPhase){
+            $scope.phase = nextPhase
+            clearInterval($scope.interval);
+          }else if(gameInfo.current_player.id === $scope.player.playerInfo.id){
+            $scope.phase = gameInfo.time_of_day
+            clearInterval($scope.interval);
+          }else{
+            var cP = gameInfo.current_player;
+            $scope.notifications = gameInfo.notifications
+            $scope.sjs.moveOtherPlayer(cP.x, cP.y, cP.id);
+          }
+        });
+      },5000);
+    }
+
+    // Daylight Functions
+    $scope.nextAction = function (){
+      $scope.player.nextAction($scope.dice, function(playerInfo){
+        //If a player had been blocked
+        if(playerInfo.action && playerInfo.action === true){
+          $scope.actionQueues = []
+          $scope.next_action_b = true;
+          $scope.next_turn_b = false;
+        };
+
+        if($scope.actionQueues.length === 0){return;}
+        var currentAction = $scope.actionQueues.shift();
+        $scope.notifications = playerInfo.notifications
+        if(currentAction.action_name === 'move'){
+          $scope.sjs.movePlayer(currentAction.clearing.x, currentAction.clearing.y);
+        }else if(currentAction.action_name === 'enchant'){
+          $scope.sjs.enchantTile(currentAction.clearing.tile.name)
+        }else if(currentAction.action_name === 'search'){
+          $scope.items = ['Peer', 'Locate'];
+          $scope.text = 'You have two options for searching...'
+          $scope.selected = "Nothing Yet";
+          $scope.searchClearing()
+        }else if($scope.actionQueues.length === 0){
+          $scope.next_action_b = true;
+          $scope.next_turn_b = false;
         }
       });
-      if(input.mouse.click && ($scope.action === 'move' || $scope.action === 'search')) {
-        var clearingJson = $scope.target_clearings
+    };
+    $scope.searchClearing = function(){
+      $scope.open(null, function(selectedItem){
+        $scope.selected = selectedItem;
+        $scope.player.choseSelection($scope.dice, $scope.selected, function(results){
+          if(results.roll === 1){
+            $scope.searchChoice();
+          }else{
+            if($scope.actionQueues.length === 0){
+              $scope.next_action_b = true;
+              $scope.next_turn_b = false;
+              console.log('IN HERE')
+            }
+          }
+        });
+      });
+    }
+    $scope.searchChoice = function(){
+      $scope.items = ['Clues and Paths','Hidden Enemies & Paths','Passages & Clues','Hidden Enemies','Clues','Passages','Discover Chits'];
+      $scope.text = 'You rolled a 1, Pick your Action...';
+      $scope.selected = "Nothing Yet";
+      $scope.searchClearing();
+    };
 
-        for (var i = 0; i < clearingJson.length; i++) {
-          var c = clearingJson[i]
-          var within_x = (c.x+20) > mouse.click.x && mouse.click.x > (c.x-20)
-          var within_y = (c.y+20) > mouse.click.y && mouse.click.y > (c.y-20)
+    $scope.endTurn = function (){
+      $scope.player.endTurn(function(){
+        $scope.next_action_b = true;
+        $scope.next_turn_b = true;
+        $scope.waiting_for_fight();
+      });
+    };
 
-          if( within_x && within_y){
-            $scope.update_action($scope.player_info.id, c.id)
-            $scope.ticker.pause();
-            return;
+    $scope.waiting_for_fight = function(){
+      $scope.interval = setInterval(function(){
+        $scope.game.getTimeOfDay(function(timeOfDay){
+          if(_.first(timeOfDay) === 'evening'){
+            clearInterval($scope.interval);
+            $scope.fight = new Fight($stateParams.figth_id, $stateParams.player_id)
+            $scope.fight.findFight(function(fightInfo){
+              debugger;
+              if(fightInfo === 'null'){
+                $scope.wait_for_next_phase('birdsong')
+              }else{
+                url = "http://localhost:9000/games/"+$scope.fight.actor.game_id+'/players/'+$scope.player_id+"/fight/"+fightInfo.queue.id
+                window.location.href = url
+              }
+            });
+          }
+        });
+      },5000);
+    };
+
+    //Modal Function
+    $scope.open = function (size, callback) {
+      var modalInstance = $modal.open({
+        templateUrl: 'views/modals/search_modal.html',
+        controller: 'SearchModalCtrl',
+        size: size,
+        resolve: {
+          items: function () {
+            return $scope.items;
+          },
+          text: function (){
+            return $scope.text;
           }
         }
-      }
+      });
+      modalInstance.result.then(function (selectedItem) {
+        callback(selectedItem);
+      }, function () {
+        console.log("NO QUITING");
+      });
     };
-    $scope.load_player()
-    $scope.ticker = scene.Ticker(10, paint);
-    $scope.ticker.run();
+
+    //watched variables
+    $scope.$watch('block', function(newVal, oldVal) {
+      if(newVal === oldVal){return;}
+      $scope.player.updateBlock(newVal, function(player){
+        console.log('updated block')
+        console.log('player block: '+player.block)
+      });
+    });
+
+    $scope.getInventory = function(){
+      $http.get('http://localhost:3000/inventory/'+$scope.game.id+'/'+$scope.player.id).then(function(response){
+        console.log(response.data)
+        $scope.inventory = response.data
+      });
+    };
+
+    load_player();
 }]);

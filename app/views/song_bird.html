@@ -1,29 +1,113 @@
 <div class="col-md-5 pull-left">
+  <!-- birdsong phase buttons -->
   <div class="row m20">
-    <h2>Bird Song!</h2>
-    <h4>Available Actions</h4>
-    <div class="btn-group" role="group" aria-label="actions">
-      <button ng-disabled="move_b" ng-click="move_action()" class="btn btn-default">Move</button>
-      <button ng-disabled="hide_b" ng-click="hide_action()" class="btn btn-default">Hide</button>
-      <button ng-disabled="rest_b" ng-click="rest_action()" class="btn btn-default">Rest</button>
-      <button ng-disabled="search_b" ng-click="search_action()" class="btn btn-default">Search</button>
+    <div ng-if="phase === 'birdsong'">
+      <h2>Bird Song!</h2>
+      <h4>Available Actions</h4>
+      <div class="btn-group" role="group" aria-label="actions">
+        <button ng-disabled="move_b" ng-click="clickAction('move')" class="btn btn-default">
+          Move
+        </button>
+        <button ng-disabled="hide_b" ng-click="clickAction('hide')" class="btn btn-default">
+          Hide
+        </button>
+        <button ng-disabled="rest_b" ng-click="clickAction('rest')" class="btn btn-default">
+          Rest
+        </button>
+        <button ng-disabled="loot_b" ng-click="clickAction('loot')" class="btn btn-default">
+          Loot
+        </button>
+        <button ng-disabled="search_b" ng-click="clickAction('search')" class="btn btn-default">
+          Search
+        </button>
+        <button ng-disabled="enchant_b" ng-click="clickAction('enchant')" class="btn btn-default">
+          Enchant
+        </button>
+      </div>
+      <div class="mt10">
+        <button ng-click="submitActions()" class="btn btn-success btn-large">Submit Actions</button>
+      </div>
     </div>
     <div class="mt10">
-      <button ng-click="delete_action()" class="btn btn-danger btn-large">Delete</button>
-      <button ng-click="submit_actions()" class="btn btn-success btn-large">Submit Actions</button>
+      <h4>Pick Dice</h4>
+      <span style="margin-left:5px">1 <input type="radio" name="dice" ng-model="dice" value="1"></span>
+      <span style="margin-left:5px">2 <input type="radio" name="dice" ng-model="dice" value="2"></span>
+      <span style="margin-left:5px">3 <input type="radio" name="dice" ng-model="dice" value="3"></span>
+      <span style="margin-left:5px">4 <input type="radio" name="dice" ng-model="dice" value="4"></span>
+      <span style="margin-left:5px">5 <input type="radio" name="dice" ng-model="dice" value="5"></span>
+      <span style="margin-left:5px">6 <input type="radio" name="dice" ng-model="dice" value="6"></span>
+      <span style="margin-left:5px">0 <input type="radio" name="dice" ng-model="dice" value="0"></span>
+      <h4>Block?</h4>
+      <p><input name="block" type="checkbox" ng-model="block"> {{block}}</p>
+    </div>
+    <!-- daylight phase-->
+    <div ng-if="phase === 'daylight'">
+      <h2>Day Phase!</h2>
+      <div class="mt10">
+        <button ng-disabled="next_action_b"ng-click="nextAction()" class="btn btn-success btn-large">
+          Next Action
+        </button>
+        <button ng-disabled="next_turn_b" ng-click="endTurn()" class="btn btn-primary btn-large">
+          Next Turn <i class="fa fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+    <!-- wating daylight -->
+    <div ng-if="phase === 'waitingDaylight'" class="row m20">
+      <p>Waiting for other players to submit there actions...<i class="fa fa-spinner fa-spin"></i></p>
+    </div>
+    <!-- wating for other players turn -->
+    <div ng-if="phase === 'waitingOtherTurn'" class="row m20">
+      <p>Current Players Turn: {{game.gameInfo.current_players_turn}}</p>
+      <p>Waiting for other players to finish there turn...<i class="fa fa-spinner fa-spin"></i></p>
     </div>
   </div>
+
+  <!-- Actions Planed -->
   <div class="row m20">
-    <h2>Actions Planed</h2>
-    <div ng-repeat="action in action_queues" >
+    <h2>Actions Planned</h2>
+    <div ng-repeat="action in actionQueues" >
       <p>
         Action:{{$index + 1}} - {{action.action_name}} - Cleaing: {{action.clearing_id}}
         <span ng-if="action == 'move'"></span>
       </p>
     </div>
   </div>
+
+  <!-- Notificaitons -->
+  <hr>
+  <div class="row m20">
+    <h2>Notifications</h2>
+    <p ng-if='notifications.length === 0'>No notifications yet</p>
+    <div ng-repeat="note in notifications">
+      <p>
+        {{note.action}}
+      </p>
+    </div>
+  </div>
+  <hr>
+  <div ng-if="goldPile !== 'null'" class="row m20">
+    <h3>Treature - {{goldPile.clearing.tile_name}} : {{goldPile.clearing.number}}</h3>
+    <h5>Pile: {{goldPile.pile_name}}</h5>
+    <div ng-repeat="gold in goldPile.treasure_names">
+      <p>
+        {{$index + 1}}: {{gold}}
+      </p>
+    </div>
+  </div>
+  <div ng-if="inventory !== 'null'" class="row m20">
+    <h3>Player Inventory:</h3>
+    <div ng-repeat="i in inventory">
+      <p>
+        {{$index + 1}}: {{i}}
+      </p>
+    </div>
+    <button class="btn btn-success" ng-click="getInventory()">Get Inventory</button>
+  </div>
+
   <br>
   <div class="row m20">
-    <json-formatter json="player_info" open="1"></json-formatter>
+    <json-formatter json="player" open="1"></json-formatter>
+    <json-formatter json="game" open="1"></json-formatter>
   </div>
 </div>

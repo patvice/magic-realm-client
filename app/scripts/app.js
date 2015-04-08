@@ -13,7 +13,9 @@ var app = angular
     'ui.router',
     'ui.bootstrap',
     'ngResource',
-    'jsonFormatter'
+    'jsonFormatter',
+    'SpriteJSLib',
+    'underscore'
 ]);
 
 var viewsPath = 'views/';
@@ -28,7 +30,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
       controller: 'MainCtrl'
     })
     .state('setup', {
-      url: '/setup',
+      url: '/games/setup',
       templateUrl: viewsPath+'setup.html',
       controller: 'SetupCtrl'
     })
@@ -38,14 +40,14 @@ app.config(function($stateProvider, $urlRouterProvider) {
       controller: 'SetupCtrl'
     })
     .state('song_bird', {
-      url: '/game/song_bird/:id',
+      url: '/games/:game_id/players/:player_id',
       templateUrl: viewsPath+'song_bird.html',
       controller: 'SongBirdCtrl'
     })
-    .state('day_phase', {
-      url: '/game/day_phase/:id',
-      templateUrl: viewsPath+'day_phase.html',
-      controller: 'DayPhaseCtrl'
+    .state('fight', {
+      url: '/games/:game_id/players/:player_id/fight/:figth_id',
+      templateUrl: viewsPath+'fight.html',
+      controller: 'FightCtrl'
     });
 })
 .run(function($state, $rootScope) {
@@ -59,4 +61,20 @@ app.config(['$httpProvider', function($httpProvider) {
     }
 ]);
 
+angular.module('SpriteJSLib', []).factory('spriteJs', ['$window',
+  function ($window) {
+    if(typeof $window.sjs === 'undefined'){
+      throw 'Spritejs not found.';
+    }
+    return $window.sjs
+  }
+]);
+angular.module('underscore', []).factory('_', ['$window',
+  function ($window) {
+    if(typeof $window._ === 'undefined'){
+      throw 'Underscore was not found.';
+    }
+    return $window._
+  }
+]);
 
