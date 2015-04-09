@@ -45,16 +45,16 @@ angular.module('MagicRealm')
     //
     var setGame = function(){
       //Guard
-      spriteObjects.guard = objects.Sprite('images/dwellings/guard.jpg')
+      spriteObjects.guard = buildings.Sprite('images/dwellings/guard.jpg')
       spriteObjects.guard.position(956, 447);
       //House
-      spriteObjects.house = objects.Sprite('images/dwellings/house.jpg')
+      spriteObjects.house = buildings.Sprite('images/dwellings/house.jpg')
       spriteObjects.house.position(1124, 520);
       //Inn
-      spriteObjects.inn = objects.Sprite('images/dwellings/inn.jpg')
+      spriteObjects.inn = buildings.Sprite('images/dwellings/inn.jpg')
       spriteObjects.inn.position(527, 705);
       //Chapel
-      spriteObjects.chapel = objects.Sprite('images/dwellings/chapel.jpg')
+      spriteObjects.chapel = buildings.Sprite('images/dwellings/chapel.jpg')
       spriteObjects.chapel.position(606, 1105);
     };
 
@@ -217,10 +217,27 @@ angular.module('MagicRealm')
       });
     };
 
+    var removeAddMonsters = function(monsters){
+      var oldMonsters = spriteObjects.monsters
+      spriteObjects.monsters = []
+      if(oldMonsters !== undefined){
+        oldMonsters.forEach(function(monster){
+          monster.remove();
+        });
+      }
+      monsters.forEach(function(monster){
+        var img = 'images/monsters/'+monster.url
+        var monsterSprite = buildings.Sprite(img);
+        monsterSprite.move(monster.x-offSetX, monster.y-offSetY)
+        spriteObjects.monsters.push(monsterSprite);
+      });
+    }
+
     var Sjs = function(player, game, callback1, callback2){
       setPlayer(player.playerInfo.character_class.name, player.x, player.y);
 
       setOtherPlayers(game, player.playerInfo.id);
+      removeAddMonsters(game.monsters)
       setTreasures(player.playerInfo.found_clearings);
       setGame();
       updateMove = callback1;
@@ -286,6 +303,9 @@ angular.module('MagicRealm')
         sprite.move(treasure.x-offSetX, treasure.y-offSetY);
         spriteObjects.treasures.push(sprite)
       });
+    }
+    Sjs.prototype.addMonsters = function(monsters){
+      removeAddMonsters(monsters);
     }
 
     Sjs.prototype.pauseTicker = function(sjs){

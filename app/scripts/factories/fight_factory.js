@@ -53,7 +53,7 @@ angular.module('MagicRealm')
         if(actor.monster_id === null){
           actor.img_src = 'images/character_icons/chr_'+actor.player.character_class.name+'.jpg'
         }else{
-          actor.img_src = 'images/monsters/'+actor.monster.name+'.gif'
+          actor.img_src = 'images/monsters_fight/'+actor.monster.name
         }
       })
     };
