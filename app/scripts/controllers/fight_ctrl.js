@@ -56,7 +56,7 @@ angular.module('MagicRealm')
           }else if(fightInfo.current_state === 'complete'){
             clearInterval($scope.interval);
             console.log("THE FIGHT IS OVER")
-            url = "http://localhost:9000/games/"+$scope.fight.actor.game_id+'/players/'+$scope.player_id
+            url = "http://localhost:9000/#/games/"+$scope.fight.actor.game_id+'/players/'+$stateParams.player_id
             window.location.href = url
           }else{
             $scope.playersNotReady = fightInfo.players

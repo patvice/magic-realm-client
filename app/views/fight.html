@@ -5,7 +5,7 @@
     <div class="col-md-2" ng-repeat="actor in fight.otherActors">
       <img ng-src="{{actor.img_src}}">
       <div ng-if="actor.player === null">
-        <p>Name: {{actor.monster.name}}</p>
+        <p>Name: {{actor.monster.monster}}</p>
         <p>Wounds: {{actor.monster.wounds}}</p>
         <p>Fatigue: {{actor.monster.fatigue}}</p>
         <p>Till Death: {{actor.monster.wounds + (actor.monster.fatigue/2)}} / {{actor.monster.vulnerability}}</p>
@@ -51,7 +51,7 @@
         {{target}}
           <select name="target" ng-model="target">
             <option ng-repeat="actor in fight.otherActors" value="{{actor.id}}">
-              <span ng-if="actor.player === null">{{actor.monster.name}}</span>
+              <span ng-if="actor.player === null">{{actor.monster.monster}}</span>
               <span ng-if="actor.monster === null">{{actor.player.name}}</span>
             </option>
           </select>

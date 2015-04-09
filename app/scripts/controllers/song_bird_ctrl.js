@@ -55,6 +55,7 @@ angular.module('MagicRealm')
         $scope.notifications = game.notifications
         $scope.player.getPlayerInfo(function(player){
             $scope.sjs.removeAndSetTreasures(player.found_clearings)
+            $scope.sjs.addMonsters($scope.game.gameInfo.monsters)
             $scope.actionQueues = $scope.player.actionQueues;
             $scope.updateButtons();
         });
@@ -150,7 +151,6 @@ angular.module('MagicRealm')
               reset_player();
             }else{
               $scope.wait_for_other_players('');
-
             }
           }
         });
@@ -187,6 +187,11 @@ angular.module('MagicRealm')
         if($scope.actionQueues.length === 0){return;}
         var currentAction = $scope.actionQueues.shift();
         $scope.notifications = playerInfo.notifications
+        if($scope.actionQueues.length === 0){
+          $scope.next_action_b = true;
+          $scope.next_turn_b = false;
+        }
+
         if(currentAction.action_name === 'move'){
           $scope.sjs.movePlayer(currentAction.clearing.x, currentAction.clearing.y);
         }else if(currentAction.action_name === 'enchant'){
@@ -196,12 +201,10 @@ angular.module('MagicRealm')
           $scope.text = 'You have two options for searching...'
           $scope.selected = "Nothing Yet";
           $scope.searchClearing()
-        }else if($scope.actionQueues.length === 0){
-          $scope.next_action_b = true;
-          $scope.next_turn_b = false;
         }
       });
     };
+
     $scope.searchClearing = function(){
       $scope.open(null, function(selectedItem){
         $scope.selected = selectedItem;
@@ -229,6 +232,7 @@ angular.module('MagicRealm')
       $scope.player.endTurn(function(){
         $scope.next_action_b = true;
         $scope.next_turn_b = true;
+        reset_player();
         $scope.waiting_for_fight();
       });
     };
@@ -238,13 +242,14 @@ angular.module('MagicRealm')
         $scope.game.getTimeOfDay(function(timeOfDay){
           if(_.first(timeOfDay) === 'evening'){
             clearInterval($scope.interval);
+            debugger;
             $scope.fight = new Fight($stateParams.figth_id, $stateParams.player_id)
             $scope.fight.findFight(function(fightInfo){
               debugger;
               if(fightInfo === 'null'){
                 $scope.wait_for_next_phase('birdsong')
               }else{
-                url = "http://localhost:9000/games/"+$scope.fight.actor.game_id+'/players/'+$scope.player_id+"/fight/"+fightInfo.queue.id
+                url = "http://localhost:9000/#/games/"+$scope.game.id+'/players/'+$scope.player.id+"/fight/"+fightInfo.queue.id
                 window.location.href = url
               }
             });
