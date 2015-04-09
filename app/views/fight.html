@@ -8,13 +8,15 @@
         <p>Name: {{actor.monster.monster}}</p>
         <p>Wounds: {{actor.monster.wounds}}</p>
         <p>Fatigue: {{actor.monster.fatigue}}</p>
-        <p>Till Death: {{actor.monster.wounds + (actor.monster.fatigue/2)}} / {{actor.monster.vulnerability}}</p>
+        <p>Till Death: {{(actor.monster.wounds + actor.monster.fatigue)}} / {{actor.monster.vulnerability}}</p>
+        <p>Is dead? {{actor.monster.dead}}</p>
       </div>
       <div ng-if="actor.monster === null">
         <p>Name: {{actor.player.name}}</p>
         <p>Wounds: {{actor.player.wounds}}</p>
         <p>Fatigue: {{actor.player.fatigue}}</p>
-        <p>Till Death: {{(actor.player.wounds + (actor.player.fatigue/2))}} / 12</p>
+        <p>Till Death: {{(actor.player.wounds + actor.player.fatigue)}} / 12</p>
+        <p>Is dead? {{actor.player.dead}}</p>
       </div>
 
     </div>
@@ -51,8 +53,8 @@
         {{target}}
           <select name="target" ng-model="target">
             <option ng-repeat="actor in fight.otherActors" value="{{actor.id}}">
-              <span ng-if="actor.player === null">{{actor.monster.monster}}</span>
-              <span ng-if="actor.monster === null">{{actor.player.name}}</span>
+              <span ng-if="actor.player === null && actor.monster.dead">{{actor.monster.monster}} {{actor.monster.dead}}</span>
+              <span ng-if="actor.monster === null && actor.player.dead == false">{{actor.player.name}}</span>
             </option>
           </select>
         </p>
