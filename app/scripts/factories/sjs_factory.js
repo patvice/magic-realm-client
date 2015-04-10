@@ -20,7 +20,7 @@ angular.module('MagicRealm')
     spriteObjects.blueCircles = [];
     spriteObjects.greenCircles = [];
 
-    var scene = sjs.Scene({w: 725, h: 650});
+    var scene = sjs.Scene({w: 700, h: 600});
 
     var board = scene.Layer('board', {useCanvas:false});
     var clearing = scene.Layer('clearing', {useCanvas:true});
@@ -32,7 +32,7 @@ angular.module('MagicRealm')
     var mouse = input.mouse;
 
     var clearingObjects = [];
-    var clearingScene = sjs.Scene({w: 400, h: 100});
+    var clearingScene = sjs.Scene({w: 700, h: 80});
     var tray = clearingScene.Layer('tray', {userCanvas:true});
 
     var background = MapBuilder.generateBoard(board);
@@ -323,6 +323,10 @@ angular.module('MagicRealm')
       tileNames.forEach(function(tileName){
         MapBuilder.enchantTile(background, tileName);
       });
+    }
+
+    Sjs.prototype.remove_sjs = function(){
+      scene.remove();
     }
 
     var ticket = scene.Ticker(5, paint);

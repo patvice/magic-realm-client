@@ -1,6 +1,6 @@
 'use strict';
 
-var url = 'http://localhost:3000/'
+var url = 'http://192.168.0.101:3000/'
 // var url = #actually_url
 
 angular.module('MagicRealm')
@@ -11,6 +11,3 @@ angular.module('MagicRealm')
       update: { method:'PUT', params:{id: '@id'} },
     });
 }]);
-
-//http://localhost:3000/players/1/move_clearing
-//http://localhost:3000/players/1/move_clearing
