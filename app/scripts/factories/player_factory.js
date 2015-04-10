@@ -3,8 +3,8 @@
 angular.module('MagicRealm')
   .factory('Player',['_', '$http', 'ActionQueue', function( _, $http, ActionQueue){
 
-    var url = 'http://192.168.0.101:3000/players/'
-    var actionUrl = 'http://192.168.0.101:3000/action_queues/'
+    var url = 'http://localhost:3000/players/'
+    var actionUrl = 'http://localhost:3000/action_queues/'
     // TODO: Move url to a config file
     // var url =
 

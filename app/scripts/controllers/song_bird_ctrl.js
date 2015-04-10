@@ -1,6 +1,6 @@
 'use strict';
 
-var url = 'http://192.168.0.101:3000/'
+var url = 'http://localhost:3000/'
 // var url = #actually_url
 
 angular.module('MagicRealm')
@@ -19,8 +19,8 @@ angular.module('MagicRealm')
   //-------------------
 
   function ($scope, $state, $stateParams, $modal, $http, _, Player, Game, Sjs, Fight) {
-    var url_base = 'http://192.168.0.101:9000/'
-    var server = 'http://192.168.0.101:3000/'
+    var url_base = 'http://localhost:9000/'
+    var server = 'http://localhost:3000/'
     $scope.dice = '0';
     $scope.block = false;
     $scope.action = ''

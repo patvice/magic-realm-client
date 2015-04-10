@@ -8,7 +8,7 @@ angular.module('MagicRealm')
   //---------------
     function( _, $http){
 
-    var url = 'http://192.168.0.101:3000/games/'
+    var url = 'http://localhost:3000/games/'
     // TODO: Move url to a config file
     // var url =
 

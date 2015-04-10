@@ -10,7 +10,7 @@ angular.module('MagicRealm')
   //---------------
 
   function ($scope, $stateParams, Fight, _) {
-     var base_url = 'http://192.168.0.101:9000/'
+     var base_url = 'http://localhost:9000/'
     $scope.waiting = false;
     $scope.attack = null;
     $scope.defence = null;
