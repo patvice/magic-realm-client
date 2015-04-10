@@ -1,6 +1,6 @@
 'use strict';
 
-var url = 'http://localhost:3000/'
+var url = 'http://192.168.0.101:3000/'
 // var url = #actually_url
 
 angular.module('MagicRealm')
@@ -17,7 +17,10 @@ angular.module('MagicRealm')
     'Sjs',
     'Fight',
   //-------------------
+
   function ($scope, $state, $stateParams, $modal, $http, _, Player, Game, Sjs, Fight) {
+    var url_base = 'http://192.168.0.101:9000/'
+    var server = 'http://192.168.0.101:3000/'
     $scope.dice = '0';
     $scope.block = false;
     $scope.action = ''
@@ -36,7 +39,7 @@ angular.module('MagicRealm')
       $scope.game.getGameInfo(function(game){
         console.log(game)
         if(game.turn === 29){
-          window.location = 'http://localhost:3000/games/'+$scope.game.id+"/winning"
+          window.location = server+'/games/'+$scope.game.id+"/winning"
           return
         }
         $scope.phase = $scope.game.gameInfo.time_of_day
@@ -80,12 +83,12 @@ angular.module('MagicRealm')
       var actionQueue = _.last($scope.actionQueues)
       var blank = $scope.action === ''
       if(actionQueue){
-        $scope.move_b = !actionQueue.buttons.move_b && !blank
-        $scope.hide_b = !actionQueue.buttons.hide_b && !blank
-        $scope.rest_b = !actionQueue.buttons.rest_b && !blank
-        $scope.loot_b = !actionQueue.buttons.loot_b && !blank
-        $scope.search_b = !actionQueue.buttons.search_b && !blank
-        $scope.enchant_b = !actionQueue.buttons.enchant_b && !blank
+        $scope.move_b = !actionQueue.buttons.move_b
+        $scope.hide_b = !actionQueue.buttons.hide_b
+        $scope.rest_b = !actionQueue.buttons.rest_b
+        $scope.loot_b = !actionQueue.buttons.loot_b
+        $scope.search_b = !actionQueue.buttons.search_b
+        $scope.enchant_b = !actionQueue.buttons.enchant_b
       }
     };
     $scope.clickAction = function(action){
@@ -164,6 +167,7 @@ angular.module('MagicRealm')
             clearInterval($scope.interval);
           }else if(gameInfo.current_player.id === $scope.player.playerInfo.id){
             $scope.phase = gameInfo.time_of_day
+            reset_player();
             clearInterval($scope.interval);
           }else{
             var cP = gameInfo.current_player;
@@ -245,14 +249,16 @@ angular.module('MagicRealm')
             debugger;
             $scope.fight = new Fight($stateParams.figth_id, $stateParams.player_id)
             $scope.fight.findFight(function(fightInfo){
-              debugger;
               if(fightInfo === 'null'){
                 $scope.wait_for_next_phase('birdsong')
               }else{
-                url = "http://localhost:9000/#/games/"+$scope.game.id+'/players/'+$scope.player.id+"/fight/"+fightInfo.queue.id
+                $scope.sjs.remove_sjs();
+                url = url_base+"#/games/"+$scope.game.id+'/players/'+$scope.player.id+"/fight/"+fightInfo.queue.id
                 window.location.href = url
               }
             });
+          }else{
+
           }
         });
       },5000);
@@ -290,7 +296,7 @@ angular.module('MagicRealm')
     });
 
     $scope.getInventory = function(){
-      $http.get('http://localhost:3000/inventory/'+$scope.game.id+'/'+$scope.player.id).then(function(response){
+      $http.get(server+'/inventory/'+$scope.game.id+'/'+$scope.player.id).then(function(response){
         console.log(response.data)
         $scope.inventory = response.data
       });

@@ -8,14 +8,14 @@
         <p>Name: {{actor.monster.monster}}</p>
         <p>Wounds: {{actor.monster.wounds}}</p>
         <p>Fatigue: {{actor.monster.fatigue}}</p>
-        <p>Till Death: {{(actor.monster.wounds + actor.monster.fatigue)}} / {{actor.monster.vulnerability}}</p>
+        <p>Till Death: {{((actor.monster.wounds*2) + actor.monster.fatigue)}} / {{actor.monster.vulnerability}}</p>
         <p>Is dead? {{actor.monster.dead}}</p>
       </div>
       <div ng-if="actor.monster === null">
         <p>Name: {{actor.player.name}}</p>
         <p>Wounds: {{actor.player.wounds}}</p>
         <p>Fatigue: {{actor.player.fatigue}}</p>
-        <p>Till Death: {{(actor.player.wounds + actor.player.fatigue)}} / 12</p>
+        <p>Till Death: {{((actor.player.wounds*2) + actor.player.fatigue)}} / 12</p>
         <p>Is dead? {{actor.player.dead}}</p>
       </div>
 
@@ -23,10 +23,12 @@
   </div>
   <hr>
   <div class="row m20">
-    <div class='col-md-6'>
+    <div class='col-md-4'>
       <div ng-if="phase === 'waiting'">
         Waiting for other player(s) ... <i class=""></i>
-        <p ng-repeat="player in playersNotReady">{{players}}</p>
+        <div ng-repeat="player in playersNotReady">
+          <p>{{player}}</p>
+        </div>
       </div>
       <div ng-if="phase === 'select'">
         <h3>Select Actions This Round</h3>
@@ -73,7 +75,13 @@
         <button class="btn btn-success" ng-click="submitChoice(choice)">Submit</button>
       </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
+      <h3>Player Stats</h3>
+      <p>wounds: {{fight.player.wounds}}</p>
+      <p>fatigue: {{fight.player.fatigue}}</p>
+      <p>Till Death: {{(fight.player.wounds*2)+fight.player.fatigue}} / 12</p>
+    </div>
+    <div class="col-md-4">
       <h3>Notifications</h3>
       <p ng-if="notificaitons !== null" ng-repeat="notes in notificaionts">{{note.action}}</p>
       <p ng-if="notificaiotns === null">No notificaitons at this time</p>

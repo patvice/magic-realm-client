@@ -8,7 +8,7 @@ angular.module('MagicRealm')
   //---------------
     function( _, $http){
 
-      var url = 'http://localhost:3000/fight_queues/'
+      var url = 'http://192.168.0.101:3000/fight_queues/'
     // TODO: Move url to a config file
     // var url =
 
@@ -18,6 +18,7 @@ angular.module('MagicRealm')
       this.queue = null;
       this.actor = null;
       this.action = null;
+      this.player = null;
       this.otherActors = null;
     }
 
@@ -34,6 +35,7 @@ angular.module('MagicRealm')
         self.queue = response.data.queue
         self.actor = response.data.actor
         self.action = response.data.action
+        self.player = response.data.player
         callback(response.data)
         return response
       });
