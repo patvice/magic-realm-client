@@ -75,13 +75,17 @@ angular.module('MagicRealm')
 
     //BirdSong functions
     $scope.updateButtons = function(){
-      if($scope.actionQueues.length === 0 && $scope.phase === 'daylight'){
-        $scope.next_action_b = true;
-        $scope.next_turn_b = false;
+      if ($scope.game.gameInfo.time_of_day === 'daylight'){
+        $scope.next_action_b = false;
+        $scope.next_turn_b = true;
+        if($scope.actionQueues.length === 0){
+          $scope.next_action_b = true;
+          $scope.next_turn_b = false;
+          return;
+        }
       }
 
       var actionQueue = _.last($scope.actionQueues)
-      var blank = $scope.action === ''
       if(actionQueue){
         $scope.move_b = !actionQueue.buttons.move_b
         $scope.hide_b = !actionQueue.buttons.hide_b
@@ -89,6 +93,13 @@ angular.module('MagicRealm')
         $scope.loot_b = !actionQueue.buttons.loot_b
         $scope.search_b = !actionQueue.buttons.search_b
         $scope.enchant_b = !actionQueue.buttons.enchant_b
+      }else{
+        $scope.move_b = false;
+        $scope.hide_b = false;
+        $scope.rest_b = false;
+        $scope.loot_b = false;
+        $scope.search_b = false;
+        $scope.enchant_b = false;
       }
     };
     $scope.clickAction = function(action){
@@ -206,6 +217,8 @@ angular.module('MagicRealm')
           $scope.selected = "Nothing Yet";
           $scope.searchClearing()
         }
+        reset_player();
+        $scope.updateButtons();
       });
     };
 
@@ -246,7 +259,6 @@ angular.module('MagicRealm')
         $scope.game.getTimeOfDay(function(timeOfDay){
           if(_.first(timeOfDay) === 'evening'){
             clearInterval($scope.interval);
-            debugger;
             $scope.fight = new Fight($stateParams.figth_id, $stateParams.player_id)
             $scope.fight.findFight(function(fightInfo){
               if(fightInfo === 'null'){
